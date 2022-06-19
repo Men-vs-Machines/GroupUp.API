@@ -10,6 +10,7 @@ using GroupUp.API.Domain;
 using GroupUp.API.Domain.DTO;
 using GroupUp.API.Domain.Interfaces;
 using GroupUp.API.Domain.Models;
+using GroupUp.API.Firestore.Utility;
 
 namespace GroupUp.API.Firestore
 {
@@ -27,14 +28,16 @@ namespace GroupUp.API.Firestore
 
         public async Task<UserDto> Create(User user)
         {
-            var args = new UserRecordArgs
+            if (string.IsNullOrEmpty(user.DisplayName) || string.IsNullOrEmpty(user.Password))
             {
-                Email = user.DisplayName,
-                Password = user.Password
-            };
+                throw new Exception("Invalid login credentials");
+            }
+            
+            var freshBakedUser = UserMapper.AppendEmailToUsername(user);
 
-            var userRecord = await FirebaseAuth.DefaultInstance.CreateUserAsync(args);
-            return _mapper.Map<UserRecord, UserDto>(userRecord);
+            var userRecord = await FirebaseAuth.DefaultInstance.CreateUserAsync(freshBakedUser);
+            var mappedUser = _mapper.Map<UserRecord, UserDto>(userRecord);
+            return await AttachToken(mappedUser);
         }
 
         public async Task<WriteResult> Update(User record)
@@ -132,6 +135,24 @@ namespace GroupUp.API.Firestore
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// Deletes up to 200 Firebase Auth Users at once
+        /// </summary>
+        public async Task NukeUsers()
+        {
+            var users = FirebaseAuth.DefaultInstance.ListUsersAsync(new ListUsersOptions{PageSize = 200});
+            var usersResult = await users.ReadPageAsync(200);
+            var ids = usersResult.Select(u => u.Uid).ToList();
+            await FirebaseAuth.DefaultInstance.DeleteUsersAsync(ids);
+        }
+        
+        private async Task<UserDto> AttachToken(UserDto user)
+        {
+            var token = await FirebaseAuth.DefaultInstance.CreateCustomTokenAsync(user.Uid);
+            user.Token = token;
+            return user;
         }
     }
 }

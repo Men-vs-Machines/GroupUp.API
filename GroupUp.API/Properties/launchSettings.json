@@ -10,7 +10,6 @@
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
-      "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -18,7 +17,6 @@
     },
     "SecretSanta.API": {
       "commandName": "Project",
-      "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {

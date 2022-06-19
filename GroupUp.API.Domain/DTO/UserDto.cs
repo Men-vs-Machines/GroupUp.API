@@ -14,5 +14,7 @@ namespace GroupUp.API.Domain.DTO
         public IEnumerable<string> WishList { get; set; }
         
         public string Token { get; set; }
+
+        public string Uid { get; set; }
     }
 }

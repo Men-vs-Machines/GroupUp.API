@@ -9,7 +9,6 @@ namespace GroupUp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
     [Produces("application/json")]
     public class UsersController : ControllerBase
     {
@@ -20,6 +19,7 @@ namespace GroupUp.API.Controllers
             _userRepository = userRepository;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

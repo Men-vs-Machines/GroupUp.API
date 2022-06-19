@@ -1,4 +1,5 @@
 using System;
+using AspNetCoreRateLimit;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -54,6 +55,12 @@ namespace GroupUp.API
             });
 
             services.AddSwaggerGenNewtonsoftSupport();
+            
+            services.AddOptions();
+            services.AddMemoryCache();
+            services.AddInMemoryRateLimiting();
+            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
             var config = Configuration.GetSection("Firestore").Get<FirestoreConfig>();
             services.AddSingleton<IUserRepository, UserRepository>();
@@ -99,6 +106,8 @@ namespace GroupUp.API
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseIpRateLimiting();
             
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GroupUp.API v1"));
