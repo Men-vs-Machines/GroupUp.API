@@ -35,12 +35,12 @@ namespace GroupUp.API
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Filepath);
+            // Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Filepath);
                         
-            FirebaseApp.Create(new AppOptions
-            {
-                Credential = GoogleCredential.GetApplicationDefault(),
-            });
+            // FirebaseApp.Create(new AppOptions
+            // {
+            //     Credential = GoogleCredential.GetApplicationDefault(),
+            // });
         }
 
         private IConfiguration Configuration { get; }
@@ -96,6 +96,7 @@ namespace GroupUp.API
             });
 
             services.AddAutoMapper(typeof(MappingProfile));
+            services.AddHealthChecks();
         }
             
 
@@ -118,7 +119,11 @@ namespace GroupUp.API
             app.UseAuthorization();
             app.UseHttpsRedirection();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints => 
+            { 
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
+            });
         }
     }
 }
